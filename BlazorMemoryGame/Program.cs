@@ -1,9 +1,9 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using BlazorMemoryGame.Models;
 using System.Net.Http;
 using System;
+using MemoryGame.Model;
 
 namespace BlazorMemoryGame
 {

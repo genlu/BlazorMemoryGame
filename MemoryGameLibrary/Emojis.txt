@@ -1,0 +1,6 @@
+﻿🐱, Cat
+🐶, Dog
+🐹, Mouse
+🍕, Pizza
+🌮, Taco
+🍜, Ramen
