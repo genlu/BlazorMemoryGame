@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
 
-namespace MemoryGame.Card
+namespace MemoryGame.Cards
 {
     public class CatCard
     {
-        public static ImmutableArray<string> AllEmojis { get; } = ImmutableArray.Create("🐱");
+        public static ImmutableArray<string> AllEmojis { get; } = (new[] { "🐱" }).ToImmutableArray();
 
         public static CatCard Create(string animal)
         {
@@ -14,6 +14,7 @@ namespace MemoryGame.Card
                 return new CatCard();
             }
 
+            // Use another constrcutor
             throw new ArgumentException();
         }
 

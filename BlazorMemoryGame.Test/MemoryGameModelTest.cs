@@ -1,23 +1,38 @@
-﻿using MemoryGame.Model;
+﻿using System.Text.Json;
+using MemoryGame.Cards;
+using MemoryGame.Model;
 using Xunit;
 
 namespace MemoryGame.Test
 {
     public class MemoryGameModelTest
     {
-        // #4. Add a test for matching cards
-
         [Fact]
-        public void HaveMatchingPairs()
+        public void TestSerialization()
         {
-            var model = new MemoryGameModel(0);
-            for (var i = 0; i < model.ShuffledCards.Length; ++i)
-            {
-                var currentCard = model.ShuffledCards[i];
-                var remainingCards = model.ShuffledCards.RemoveAt(i);
-                Assert.Contains(currentCard, remainingCards);
-            }
+            var card = CatCard.Create("🐱");
+            var jsonString = JsonSerializer.Serialize<CatCard>((CatCard)card);  //Simplification fixes 
+            Assert.Equal($"{{\"{nameof(CatCard.Emoji)}\":\"\\uD83D\\uDC31\",\"IsTurned\":false,\"IsMatched\":false,\"CssClass\":\"\"}}", jsonString);
+
+            // Convert regular string literal to verbatim string literal
+            string toSerialize = $"\r\n{{ \r\n\"{nameof(CatCard.Emoji)}\": \r\n\"\\uD83D\\uDC31\", \r\n\"IsTurned\": false, \r\n\"IsMatched\": false, \r\n\"CssClass\": \"\" \r\n}}";
+            var newCard = JsonSerializer.Deserialize<CatCard>(toSerialize);
+            Assert.Equal("🐱", newCard.Emoji);
         }
+
+        // Add a test for matching cards
+
+        //[Fact]
+        //public void HaveMatchingPairs()
+        //{
+        //    var model = new MemoryGameModel(0);
+        //    for (var i = 0; i < model.ShuffledCards.Length; ++i)
+        //    {
+        //        var currentCard = model.ShuffledCards[i];
+        //        var remainingCards = model.ShuffledCards.RemoveAt(i);
+        //        Assert.Contains(currentCard, remainingCards);
+        //    }
+        //}
 
         // #7. Add more tests to increase test coverage
 

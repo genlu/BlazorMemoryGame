@@ -12,13 +12,13 @@ namespace MemoryGame.Model
         // field naming rule
         private readonly int turnDelayDuration;
         private DateTime? timerStart, timerEnd;
-        private BaseCard lastCardSelected;
+        private CatCard lastCardSelected;
         private bool isTurningInProgress;
 
         // readonly modifier rule
         private Timer timer = new Timer(100);
 
-        public ImmutableArray<BaseCard> ShuffledCards { get; set; }
+        public ImmutableArray<CatCard> ShuffledCards { get; set; }
 
         public int MatchesFound { get; private set; }
         public int MatchesFoundP1 { get; private set; }
@@ -48,16 +48,16 @@ namespace MemoryGame.Model
         public void ResetGame()
         {
             // Add exception handling here
-            ShuffledCards = CreateShuffledCardPairs(BaseCard.AllEmojis);
+            ShuffledCards = CreateShuffledCardPairs(CatCard.AllEmojis);
             MatchesFound = 0;
             timerStart = timerEnd = null;
         }
 
-        private ImmutableArray<BaseCard> CreateShuffledCardPairs(ImmutableArray<string> emojis)
+        private ImmutableArray<CatCard> CreateShuffledCardPairs(ImmutableArray<string> emojis)
         {
             emojis = Shuffle(emojis);
             var random = new Random();
-            return emojis.Concat(emojis).OrderBy(item => random.Next()).Select(item => BaseCard.Create(item)).ToImmutableArray();
+            return emojis.Concat(emojis).OrderBy(item => random.Next()).Select(item => CatCard.Create(item)).ToImmutableArray();
         }
 
 
@@ -68,7 +68,7 @@ namespace MemoryGame.Model
             return emojis.OrderBy(item => random.Next()).ToImmutableArray();
         }
 
-        public async Task SelectCardAsync(BaseCard card)
+        public async Task SelectCardAsync(CatCard card)
         {
             if (!timer.Enabled)
             {
@@ -114,7 +114,7 @@ namespace MemoryGame.Model
                     lastCardSelected = card;
                 }
 
-                if (MatchesFound == BaseCard.AllEmojis.Length)
+                if (MatchesFound == CatCard.AllEmojis.Length)
                 {
                     timerEnd = DateTime.Now;
                     timer.Stop();

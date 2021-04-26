@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,13 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="CatCard.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <!-- Include the generator reference to auto-generate card classes  -->
-    <ProjectReference Include="..\CardTypeGenerator\CardTypeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-  <ItemGroup>
-    <AdditionalFiles Include="Emojis.txt" />
+    <!--<ProjectReference Include="..\CardTypeGenerator\CardTypeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
+    <!--<AdditionalFiles Include="Emojis.txt" />-->
   </ItemGroup>
 </Project>
