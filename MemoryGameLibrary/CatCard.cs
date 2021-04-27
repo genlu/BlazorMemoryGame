@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Immutable;
-
-namespace MemoryGame.Cards
+﻿namespace MemoryGame.Cards
 {
-    public class CatCard
+    public interface ICard
     {
-        public static ImmutableArray<string> AllEmojis { get; } = (new[] { "🐱" }).ToImmutableArray();
+        string Animal { get; }
+        bool IsTurned { get; set; }
+        bool IsMatched { get; set; }
+        string CssClass { get; }
+    }
 
-        public static CatCard Create(string animal)
-        {
-            if (animal == "🐱")
-            {
-                return new CatCard();
-            }
-
-            // Use another constrcutor
-            throw new ArgumentException();
-        }
-
-        public string Emoji => "🐱";
+    // #6. Implement IEquatable and fix diagnostics
+    // #9. Extract a common base calss for more card types
+    public class CatCard : ICard
+    {
+        public string Animal { get; } = "🐱";
         public bool IsTurned { get; set; }
         public bool IsMatched { get; set; }
 
@@ -26,6 +20,7 @@ namespace MemoryGame.Cards
         {
             get
             {
+                // Convert to switch expression
                 switch ((IsTurned, IsMatched))
                 {
                     case (false, true): return "matched";

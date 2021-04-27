@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 using MemoryGame.Cards;
 using MemoryGame.Model;
 using Xunit;
@@ -8,21 +10,21 @@ namespace MemoryGame.Test
     public class MemoryGameModelTest
     {
         [Fact]
-        public void TestSerialization()
+        public void StartsWithZeroMatches()
         {
-            var card = CatCard.Create("🐱");
-            var jsonString = JsonSerializer.Serialize<CatCard>((CatCard)card);  //Simplification fixes 
-            Assert.Equal($"{{\"{nameof(CatCard.Emoji)}\":\"\\uD83D\\uDC31\",\"IsTurned\":false,\"IsMatched\":false,\"CssClass\":\"\"}}", jsonString);
-
-            // Convert regular string literal to verbatim string literal
-            string toSerialize = $"\r\n{{ \r\n\"{nameof(CatCard.Emoji)}\": \r\n\"\\uD83D\\uDC31\", \r\n\"IsTurned\": false, \r\n\"IsMatched\": false, \r\n\"CssClass\": \"\" \r\n}}";
-            var newCard = JsonSerializer.Deserialize<CatCard>(toSerialize);
-            Assert.Equal("🐱", newCard.Emoji);
+            var model = new MemoryGameModel(0);
+            Assert.Equal(0, model.MatchesFound);
         }
 
-        // Add a test for matching cards
+        [Fact]
+        public void StartsWithAllCardsFaceDown()
+        {
+            var model = new MemoryGameModel(0);
+            Assert.All(model.ShuffledCards, card => Assert.False(card.IsTurned));
+        }
 
-        //[Fact]
+        // #4. Add a test for matching cards
+
         //public void HaveMatchingPairs()
         //{
         //    var model = new MemoryGameModel(0);
@@ -30,7 +32,7 @@ namespace MemoryGame.Test
         //    {
         //        var currentCard = model.ShuffledCards[i];
         //        var remainingCards = model.ShuffledCards.RemoveAt(i);
-        //        Assert.Contains(currentCard, remainingCards);
+        //        Assert.Contains(currentCard, remainingCards);   // failed because we are using reference equility
         //    }
         //}
 
@@ -43,7 +45,7 @@ namespace MemoryGame.Test
         //    var model = new MemoryGameModel(0);
         //    var firstSelection = model.ShuffledCards[0];
         //    var secondSelection = model.ShuffledCards.Skip(1)
-        //        .Single(c => c.Emoji == firstSelection.Emoji);
+        //        .Single(c => c.Animal == firstSelection.Animal);
 
         //    // Select first one
         //    await model.SelectCardAsync(firstSelection);
@@ -63,11 +65,10 @@ namespace MemoryGame.Test
         //[Fact]
         //public async Task WhenUserSelectsNonMatchingPair_TurnsBothBack()
         //{
-        //    // Find a non-matching pair
         //    var model = new MemoryGameModel(0);
         //    var firstSelection = model.ShuffledCards[0];
         //    var secondSelection = model.ShuffledCards   // Uh-oh, can't find a mismatch since we only have 1 kind of card!
-        //        .First(c => c.Emoji == firstSelection.Emoji);
+        //        .First(c => c.Animal != firstSelection.Animal);
 
         //    await model.SelectCardAsync(firstSelection);
         //    Assert.True(firstSelection.IsTurned);

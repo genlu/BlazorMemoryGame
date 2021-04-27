@@ -11,24 +11,37 @@ namespace MemoryGame.Generator
     [Generator]
     public class CardTypeGenerator : ISourceGenerator
     {
+        private const string ICardCode = @"
+using System;
+namespace MemoryGame.Cards
+{
+    public interface ICard : IEquatable<ICard>
+    {
+        string Emoji { get; }
+        bool IsTurned { get; set; }
+        bool IsMatched { get; set; }
+        string CssClass { get; }
+    }
+}";
+
         private const string CardTypeCode = @"
 using System;
 namespace MemoryGame.Cards
 {{
-    public class {0}Card : BaseCard
+    public class {0}Card : AbstractCard
     {{
         public override string Emoji => ""{1}"";
     }}
 }}";
 
-        private const string AbstractCardTypeCode1 = @"
+        private const string AbstractCardTypeCode = @"
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace MemoryGame.Cards
 {
-    public abstract class BaseCard
+    public abstract class AbstractCard : ICard
     {
         public abstract string Emoji { get; }
 
@@ -49,31 +62,34 @@ namespace MemoryGame.Cards
             }
         }
 
-        public bool Equals(BaseCard other)
+        public bool Equals(ICard other)
             => string.CompareOrdinal(Emoji, other.Emoji) == 0;
 
         public override int GetHashCode()
             => HashCode.Combine(Emoji);
 
-        public static bool operator ==(BaseCard left, BaseCard right)
-            => EqualityComparer<BaseCard>.Default.Equals(left, right);
-
-        public static bool operator !=(BaseCard left, BaseCard right)
-            => !(left == right);
-
         public override bool Equals(object obj)
-            => obj is BaseCard card && this == card;
+            => obj is ICard card && Equals(card);
+    }
+}";
+        private const string CardHelpersCode1 = @"
+using System;
+using System.Collections.Immutable;
 
+namespace MemoryGame.Cards
+{
+    public static class CardHelpers
+    {
         public static ImmutableArray<string> AllEmojis { get; } = ";
 
-        private const string AbstractCardTypeCode2 = @"
+        private const string CardHelpersCode2 = @"
 
-        public static BaseCard Create(string emoji)
+        public static AbstractCard CreateCard(string emoji)
         {
             return emoji switch
             {";
 
-        private const string AbstractCardTypeCode3 = @"
+        private const string CardHelpersCode3 = @"
                 _ => throw new ArgumentException(nameof(emoji)),
             };
         }
@@ -115,13 +131,16 @@ namespace MemoryGame.Cards
 
                 // inject the created source into the users compilation
                 var allEmojiList = $@"(new[]{{ {allEmojis} }}).ToImmutableArray();";
-                var abstractCode = AbstractCardTypeCode1 + allEmojiList +
-                    AbstractCardTypeCode2 + generatedSwitchClauses.ToString() + AbstractCardTypeCode3;
+                var cardHelpers = CardHelpersCode1 + allEmojiList +
+                    CardHelpersCode2 + generatedSwitchClauses.ToString() + CardHelpersCode3;
 
-                context.AddSource("BaseCard", SourceText.From(abstractCode, Encoding.UTF8));
+                context.AddSource("CardHelpers", SourceText.From(cardHelpers, Encoding.UTF8));
+                context.AddSource("ICard", SourceText.From(ICardCode, Encoding.UTF8));
+                context.AddSource("AbstractCard", SourceText.From(AbstractCardTypeCode, Encoding.UTF8));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                throw ex;
             }
         }
 

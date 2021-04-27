@@ -7,7 +7,8 @@
 
   <ItemGroup>
     <!-- Include the generator reference to auto-generate card classes  -->
-    <!--<ProjectReference Include="..\CardTypeGenerator\CardTypeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
-    <!--<AdditionalFiles Include="Emojis.txt" />-->
+    <!--<ProjectReference Include="..\CardTypeGenerator\MemoryGame.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <AdditionalFiles Include="Emojis.txt" />-->  
+    <None Remove="Emojis.txt" />
   </ItemGroup>
 </Project>

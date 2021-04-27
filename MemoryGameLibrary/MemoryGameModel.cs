@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Xml;
+using System.Text.Json;
 using MemoryGame.Cards;
 
 namespace MemoryGame.Model
@@ -12,13 +15,13 @@ namespace MemoryGame.Model
         // field naming rule
         private readonly int turnDelayDuration;
         private DateTime? timerStart, timerEnd;
-        private CatCard lastCardSelected;
+        private ICard lastCardSelected;
         private bool isTurningInProgress;
 
         // readonly modifier rule
         private Timer timer = new Timer(100);
 
-        public ImmutableArray<CatCard> ShuffledCards { get; set; }
+        public ImmutableArray<ICard> ShuffledCards { get; set; }
 
         public int MatchesFound { get; private set; }
         public int MatchesFoundP1 { get; private set; }
@@ -47,79 +50,87 @@ namespace MemoryGame.Model
 
         public void ResetGame()
         {
-            // Add exception handling here
-            ShuffledCards = CreateShuffledCardPairs(CatCard.AllEmojis);
-            MatchesFound = 0;
-            timerStart = timerEnd = null;
-        }
-
-        private ImmutableArray<CatCard> CreateShuffledCardPairs(ImmutableArray<string> emojis)
-        {
-            emojis = Shuffle(emojis);
-            var random = new Random();
-            return emojis.Concat(emojis).OrderBy(item => random.Next()).Select(item => CatCard.Create(item)).ToImmutableArray();
-        }
-
-
-        // Static modifier rule
-        private ImmutableArray<string> Shuffle(ImmutableArray<string> emojis)
-        {
-            var random = new Random();
-            return emojis.OrderBy(item => random.Next()).ToImmutableArray();
-        }
-
-        public async Task SelectCardAsync(CatCard card)
-        {
-            if (!timer.Enabled)
+            try
             {
-                timerStart = DateTime.Now;
-                timer.Start();
+                // Extract method
+                ImmutableArray<string> emojis = CardHelpers.AllAnimals;
+                var random = new Random();
+                emojis = emojis.OrderBy(item => random.Next()).ToImmutableArray();
+                // Wrap call chain
+                var shuffledCards = emojis.Concat(emojis).OrderBy(item => random.Next()).Select(item => CardHelpers.CreateCard(item)).ToImmutableArray();
+
+                ShuffledCards = shuffledCards.CastArray<ICard>();
+                MatchesFound = 0;
+                timerStart = timerEnd = null;
             }
-
-            // Simplify conditional expression
-            if (!card.IsTurned ? !isTurningInProgress : false)
+            catch (Exception ex)
             {
-                card.IsTurned = true;
+                throw ex;
+            }
+        }
 
-                if (lastCardSelected is not null)
+        public async Task SelectCardAsync(ICard card)
+        {
+            try
+            {
+                if (!timer.Enabled)
                 {
-                    if (card.Equals(lastCardSelected))
+                    timerStart = DateTime.Now;
+                    timer.Start();
+                }
+
+                // Simplify conditional expression
+                if (!card.IsTurned ? !isTurningInProgress : false)
+                {
+                    card.IsTurned = true;
+
+                    // Invert condition
+                    if (lastCardSelected is not null)
                     {
-                        // Remove redundant equality
-                        if (PlayerTurn == true) //Player 1 = true 
+                        // extract method `SelectSecondCard`
+                        if (card.Equals(lastCardSelected))
                         {
-                            MatchesFoundP1++;
+                            // Remove redundant equality
+                            if (PlayerTurn == true)
+                            {
+                                MatchesFoundP1++;
+                            }
+                            else
+                            {
+                                MatchesFoundP2++;
+                            }
+
+                            MatchesFound++;
+                            card.IsMatched = lastCardSelected.IsMatched = true;
                         }
                         else
                         {
-                            MatchesFoundP2++;
+                            isTurningInProgress = true;
+                            await Task.Delay(turnDelayDuration);
+                            isTurningInProgress = false;
+                            PlayerTurn = !PlayerTurn;
+                            card.IsTurned = lastCardSelected.IsTurned = false;
                         }
 
-                        MatchesFound++;
-                        card.IsMatched = lastCardSelected.IsMatched = true;
+                        lastCardSelected = null;
                     }
                     else
                     {
-                        isTurningInProgress = true;
-                        await Task.Delay(turnDelayDuration); // Pause before turning back
-                        isTurningInProgress = false;
-                        PlayerTurn = !PlayerTurn;
-                        card.IsTurned = lastCardSelected.IsTurned = false;
+                        lastCardSelected = card;
                     }
 
-                    lastCardSelected = null;
+                    if (MatchesFound == CardHelpers.AllAnimals.Length)
+                    {
+                        timerEnd = DateTime.Now;
+                        timer.Stop();
+                        LatestCompletionTime = timerEnd.Value.Subtract(timerStart.Value).TotalSeconds;
+                    }
                 }
-                else
-                {
-                    lastCardSelected = card;
-                }
+            }
+            catch (Exception ex)
+            {
 
-                if (MatchesFound == CatCard.AllEmojis.Length)
-                {
-                    timerEnd = DateTime.Now;
-                    timer.Stop();
-                    LatestCompletionTime = timerEnd.Value.Subtract(timerStart.Value).TotalSeconds;
-                }
+                throw ex;
             }
         }
     }
